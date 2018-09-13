@@ -75,9 +75,7 @@ for (j in c(1:periods)) {
 
   # Compute mean
   for (i in c(1:compressed_dim)) {
-    if (trainability[i]) {
-      mean[i] <- mean(y_train[,i]) - 128
-    }
+    mean[i] <- mean(y_train[,i]) -128
   }
   
   # Building new model
@@ -86,8 +84,7 @@ for (j in c(1:periods)) {
     # Layer for output neuron i
     comp[[i]] <- layer_dense(x, units = 1, 
                              activation = activation_generator(i), 
-                             input_shape = original_dim, name = sprintf('Output_neuron_%d', i),
-                             trainable = trainability[i])
+                             input_shape = original_dim, name = sprintf('Output_neuron_%d', i))
   }
   compress <- layer_concatenate(as.vector(comp), name = 'Compression_Layer')
   decompress <- layer_dense(compress, units = original_dim, activation = activation_softplus, name = 'Decompression_Layer')
@@ -147,26 +144,15 @@ plot(entropyAE)
 print(mean(entropyAE))
 print(sd(entropyAE))
 
-# helper function for visualization
-show_digit = function(arr784, col = gray(12:1 / 12), ...) {
-  image(matrix(as.matrix(arr784[-785]), nrow = 28)[, 28:1], col = col, ...)
-}
-
-# Check Datas
-for (i in c(1:20)) {
-  show_digit(x_test[i,])
-  show_digit(predict_on_batch(fae, t(x_test[i,])))
-}
-
 # Apply the empirical distribution function
 y <- y_train
 for (i in c(1:compressed_dim)) {
   cdf <- ecdf(y_train[,i])
-  y[,i] <- cdf(y_train[,i])
+  y[,i] <- (2^(entropyAE[i] - 8))*cdf(y_train[,i])
 }
 
 # Checking the distribution
 y_df <- data.frame(y)
-for (i in c(1:compressed_dim)) {
-  plot(ggplot(melt(y_df[,i]), aes(x = value)) + geom_density(alpha = 0.5))
+for (i in c(0:15)) {
+  plot(ggplot(melt(y_df[,(i*16 + 1):((i+1)*16)]), aes(x = value, fill = variable)) + geom_density(alpha = 0.2))
 }

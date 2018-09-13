@@ -7,7 +7,7 @@ library(dplyr)
 
 # Parameters
 original_dim <- 784L
-compressed_dim <- 256L
+compressed_dim <- 150L
 batch_size <- 50L
 epochs <- 50L
 
@@ -38,9 +38,9 @@ fae %>% compile(
 
 # Train it
 hist <- fae %>% fit(
-  x_train_r, x_train_r,
+  x_train, x_train,
   epochs = epochs,
-  validation_data = list(x_test_r, x_test_r),
+  validation_data = list(x_test, x_test),
   batch_size = batch_size
 )
 
@@ -53,8 +53,9 @@ y_train <- apply(y_train, 2, round)
 y_train_df <- data.frame(y_train)
 
 # Distribution
-for (i in c(0:15)) {
-  plot(ggplot(melt(y_train_df[,(i*16 + 1):((i+1)*16)]), aes(x = value, fill = variable)) + geom_density(alpha = 0.2))
+for (i in c(0:14)) {
+  plot(ggplot(melt(y_train_df[,(i*10 + 1):((i+1)*10)]), aes(x = value, fill = variable)) + geom_density(alpha = 0.2))
+  ggsave(filename = sprintf("ReLu_%dN_%d.png", compressed_dim, i))
 }
 
 # Entropy
