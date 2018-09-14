@@ -26,7 +26,7 @@ x_train_r <- x_train / 255
 x_test_r <- x_test / 255
 
 # For all compressed dimension
-for (i in c(7:12)) {
+for (i in c(7:10)) {
   compressed_dim <- 32 + (i-1)*16
   out <- c(out, compressed_dim)
 
